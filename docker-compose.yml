@@ -51,6 +51,7 @@ services:
          - PGPOOL_PARAMS_BACKEND_WEIGHT0=0.1
          - PGPOOL_PARAMS_BACKEND_WEIGHT1=0.9
          - PGPOOL_PARAMS_MASTER_SLAVE_MODE=on
+         - PGPOOL_PARAMS_LOAD_BALANCE_MODE=on
      networks:
          - bridge-docker
      restart: always
