@@ -8,7 +8,11 @@ $ docker-compose up -d
 `$ docker ps`
 
 If you have one...
-`$ echo "localhost:9999:postgres:optima:123456" >> ~/.pgpass`
+```
+$ echo "localhost:9999:postgres:optima:123456" >> ~/.pgpass
+$ echo "localhost:5445:postgres:optima:123456" >> ~/.pgpass
+$ echo "localhost:5446:postgres:optima:123456" >> ~/.pgpass
+```
 
 # To connect to instances
 `$ psql -h localhost -Uoptima postgres -p5445`
