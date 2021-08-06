@@ -63,7 +63,6 @@ services:
 volumes:
   mdata:
   sdata:
-  stmp:
 networks:
   bridge-docker:
     external:
