@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# WIWWO - cleanup
+rm -f /tmp/touch_me_to_promote_to_me_master 2>/dev/null
+
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
 	echo "*:*:*:$PG_REP_USER:$PG_REP_PASSWORD" > ~/.pgpass
 	chmod 0600 ~/.pgpass

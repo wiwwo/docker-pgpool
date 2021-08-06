@@ -52,12 +52,18 @@ services:
          - PGPOOL_PARAMS_BACKEND_WEIGHT1=0.9
          - PGPOOL_PARAMS_MASTER_SLAVE_MODE=on
          - PGPOOL_PARAMS_LOAD_BALANCE_MODE=on
+         # FAILOVER
+         - PGPOOL_PARAMS_BACKEND_FLAG0='ALLOW_TO_FAILOVER'
+         - PGPOOL_PARAMS_BACKEND_FLAG1='ALLOW_TO_FAILOVER'
+         - PGPOOL_PARAMS_HEALTH_CHECKPERIOD=5
+         - PGPOOL_PARAMS_FAILOVER_ON_BACKEND_ERROR=ON
      networks:
          - bridge-docker
      restart: always
 volumes:
   mdata:
   sdata:
+  stmp:
 networks:
   bridge-docker:
     external:
