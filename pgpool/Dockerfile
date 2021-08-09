@@ -1,3 +1,4 @@
 FROM pgpool/pgpool
-COPY ./setup-pgpool.sh /docker-entrypoint-initdb.d/setup-pgpool.sh
-RUN chmod 0666 /docker-entrypoint-initdb.d/setup-pgpool.sh
+COPY --chown=postgres ./failover.sh /failover.sh
+RUN chown postgres: /failover.sh
+RUN chmod 0777 /failover.sh

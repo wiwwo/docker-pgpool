@@ -1,11 +1,12 @@
 version: "3"
 services:
-  pg_master_1:
+  pg_red:
+     hostname: pg_red
      build: ./master
      ports:
          - "5445:5432"
      volumes:
-         - mdata:/var/lib/postgresql/data
+         - pg_red_data:/var/lib/postgresql/data
      environment:
          - POSTGRES_USER=optima
          - POSTGRES_PASSWORD=123456
@@ -15,13 +16,16 @@ services:
      networks:
            - bridge-docker
      restart: always
-  pg_slave_1:
+  pg_green:
+     hostname: pg_green
      build: ./slave
+     depends_on:
+         - pg_red
      ports:
          - "5446:5432"
      volumes:
-         - sdata1:/var/lib/postgresql/data
-         - stmp:/tmp/pg
+         - pg_green_data:/var/lib/postgresql/data
+         - shared_tmp:/tmp
      environment:
          - POSTGRES_USER=optima
          - POSTGRES_PASSWORD=123456
@@ -31,12 +35,15 @@ services:
      networks:
             - bridge-docker
      restart: always
-  pg_slave_2:
+  pg_blue:
+     hostname: pg_blue
      build: ./slave
+     depends_on:
+         - pg_red
      ports:
          - "5447:5432"
      volumes:
-         - sdata2:/var/lib/postgresql/data
+         - pg_blue_data:/var/lib/postgresql/data
      environment:
          - POSTGRES_USER=optima
          - POSTGRES_PASSWORD=123456
@@ -48,31 +55,32 @@ services:
      restart: always
   # WIWWO
   pgpool:
+     hostname: pgpool1
      build: ./pgpool
      depends_on:
-         - pg_slave_1
-         - pg_slave_2
-         - pg_master_1
+         - pg_red
+         - pg_green
+         - pg_blue
      ports:
          - "9999:9999"
      volumes:
-         - stmp:/tmp/pg
+         - shared_tmp:/tmp
      environment:
          - POSTGRES_USERNAME=optima
          - POSTGRES_PASSWORD=123456
-         - PGPOOL_PARAMS_BACKEND_HOSTNAME0=pg_master_1
-         - PGPOOL_PARAMS_BACKEND_HOSTNAME1=pg_slave_1
-         - PGPOOL_PARAMS_BACKEND_HOSTNAME2=pg_slave_2
+         - PGPOOL_PARAMS_BACKEND_HOSTNAME0=pg_red
+         - PGPOOL_PARAMS_BACKEND_HOSTNAME1=pg_green
+         - PGPOOL_PARAMS_BACKEND_HOSTNAME2=pg_blue
          - PGPOOL_PARAMS_BACKEND_PORT0=5432
          - PGPOOL_PARAMS_BACKEND_PORT1=5432
          - PGPOOL_PARAMS_BACKEND_PORT2=5432
          - PGPOOL_PARAMS_SR_CHECK_PERIOD=10
          - PGPOOL_PARAMS_SR_CHECK_USER=rep
          - PGPOOL_PARAMS_SR_CHECK_PASSWORD=123456
-         - PGPOOL_PARAMS_HEALTH_CHECK_PERIOD=10
+         - PGPOOL_PARAMS_HEALTH_CHECK_PERIOD=2
          - PGPOOL_PARAMS_HEALTH_CHECK_USER=rep
          - PGPOOL_PARAMS_HEALTH_CHECK_PASSWORD=123456
-         - PGPOOL_PARAMS_BACKEND_WEIGHT0=0
+         - PGPOOL_PARAMS_BACKEND_WEIGHT0=1
          - PGPOOL_PARAMS_BACKEND_WEIGHT1=1
          - PGPOOL_PARAMS_BACKEND_WEIGHT2=1
          - PGPOOL_PARAMS_MASTER_SLAVE_MODE=on
@@ -80,17 +88,17 @@ services:
          # FAILOVER
          - PGPOOL_PARAMS_BACKEND_FLAG0='ALLOW_TO_FAILOVER'
          - PGPOOL_PARAMS_BACKEND_FLAG1='ALLOW_TO_FAILOVER'
-         - PGPOOL_PARAMS_BACKEND_FLAG2='ALLOW_TO_FAILOVER'
+         - PGPOOL_PARAMS_BACKEND_FLAG2='DISALLOW_TO_FAILOVER'
          - PGPOOL_PARAMS_FAILOVER_ON_BACKEND_ERROR=ON
-         - PGPOOL_PARAMS_FAILOVER_COMMAND="/bin/touch /tmp/pg/touch_me_to_promote_to_me_master"
+         - PGPOOL_PARAMS_FAILOVER_COMMAND="/failover.sh"
      networks:
          - bridge-docker
      restart: always
 volumes:
-  mdata:
-  sdata1:
-  sdata2:
-  stmp:
+  pg_red_data:
+  pg_green_data:
+  pg_blue_data:
+  shared_tmp:
 networks:
   bridge-docker:
     external:
