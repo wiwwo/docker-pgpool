@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # WIWWO - cleanup
-rm -f /tmp/touch_me_to_promote_to_me_master 2>/dev/null
+rm -f /tmp/pg/touch_me_to_promote_to_me_master 2>/dev/null
 
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
 	echo "*:*:*:$PG_REP_USER:$PG_REP_PASSWORD" > ~/.pgpass
@@ -21,7 +21,7 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
 	cat > ${PGDATA}/recovery.conf <<EOF
 	standby_mode = on
 	primary_conninfo = 'host=pg_master_1 port=5432 user=$PG_REP_USER password=$PG_REP_PASSWORD'
-	trigger_file = '/tmp/touch_me_to_promote_to_me_master'
+	trigger_file = '/tmp/pg/touch_me_to_promote_to_me_master'
 EOF
 	chown postgres. ${PGDATA} -R
 	chmod 700 ${PGDATA} -R
