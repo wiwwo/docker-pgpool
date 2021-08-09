@@ -20,7 +20,23 @@ services:
      ports:
          - "5446:5432"
      volumes:
-         - sdata:/var/lib/postgresql/data
+         - sdata1:/var/lib/postgresql/data
+         - stmp:/tmp/pg
+     environment:
+         - POSTGRES_USER=optima
+         - POSTGRES_PASSWORD=123456
+         - POSTGRES_DB=postgres
+         - PG_REP_USER=rep
+         - PG_REP_PASSWORD=123456
+     networks:
+            - bridge-docker
+     restart: always
+  pg_slave_2:
+     build: ./slave
+     ports:
+         - "5447:5432"
+     volumes:
+         - sdata2:/var/lib/postgresql/data
      environment:
          - POSTGRES_USER=optima
          - POSTGRES_PASSWORD=123456
@@ -33,36 +49,48 @@ services:
   # WIWWO
   pgpool:
      build: ./pgpool
+     depends_on:
+         - pg_slave_1
+         - pg_slave_2
+         - pg_master_1
      ports:
          - "9999:9999"
+     volumes:
+         - stmp:/tmp/pg
      environment:
          - POSTGRES_USERNAME=optima
          - POSTGRES_PASSWORD=123456
          - PGPOOL_PARAMS_BACKEND_HOSTNAME0=pg_master_1
          - PGPOOL_PARAMS_BACKEND_HOSTNAME1=pg_slave_1
+         - PGPOOL_PARAMS_BACKEND_HOSTNAME2=pg_slave_2
          - PGPOOL_PARAMS_BACKEND_PORT0=5432
          - PGPOOL_PARAMS_BACKEND_PORT1=5432
+         - PGPOOL_PARAMS_BACKEND_PORT2=5432
          - PGPOOL_PARAMS_SR_CHECK_PERIOD=10
          - PGPOOL_PARAMS_SR_CHECK_USER=rep
          - PGPOOL_PARAMS_SR_CHECK_PASSWORD=123456
          - PGPOOL_PARAMS_HEALTH_CHECK_PERIOD=10
          - PGPOOL_PARAMS_HEALTH_CHECK_USER=rep
          - PGPOOL_PARAMS_HEALTH_CHECK_PASSWORD=123456
-         - PGPOOL_PARAMS_BACKEND_WEIGHT0=0.1
-         - PGPOOL_PARAMS_BACKEND_WEIGHT1=0.9
+         - PGPOOL_PARAMS_BACKEND_WEIGHT0=0
+         - PGPOOL_PARAMS_BACKEND_WEIGHT1=1
+         - PGPOOL_PARAMS_BACKEND_WEIGHT2=1
          - PGPOOL_PARAMS_MASTER_SLAVE_MODE=on
          - PGPOOL_PARAMS_LOAD_BALANCE_MODE=on
          # FAILOVER
          - PGPOOL_PARAMS_BACKEND_FLAG0='ALLOW_TO_FAILOVER'
          - PGPOOL_PARAMS_BACKEND_FLAG1='ALLOW_TO_FAILOVER'
-         - PGPOOL_PARAMS_HEALTH_CHECKPERIOD=5
+         - PGPOOL_PARAMS_BACKEND_FLAG2='ALLOW_TO_FAILOVER'
          - PGPOOL_PARAMS_FAILOVER_ON_BACKEND_ERROR=ON
+         - PGPOOL_PARAMS_FAILOVER_COMMAND="/bin/touch /tmp/pg/touch_me_to_promote_to_me_master"
      networks:
          - bridge-docker
      restart: always
 volumes:
   mdata:
-  sdata:
+  sdata1:
+  sdata2:
+  stmp:
 networks:
   bridge-docker:
     external:
