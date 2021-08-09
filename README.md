@@ -14,6 +14,13 @@ $ echo "localhost:5445:postgres:optima:123456" >> ~/.pgpass
 $ echo "localhost:5446:postgres:optima:123456" >> ~/.pgpass
 ```
 
+# Cleanup
+
+```
+$ docker volume rm docker-pgpool_sdata{1,2} docker-pgpool_stmp docker-pgpool_mdata
+$ docker system prune
+```
+
 # To connect to instances
 `$ psql -h localhost -Uoptima postgres -p5445`
 `$ psql -h localhost -Uoptima postgres -p5446`
