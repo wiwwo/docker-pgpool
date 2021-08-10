@@ -1,1 +1,3 @@
+* Randome server to failover
 * At first start, pgpool does not manage to connect to slaves, and does not load-balance
+*

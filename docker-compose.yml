@@ -7,12 +7,14 @@ services:
          - "5445:5432"
      volumes:
          - pg_red_data:/var/lib/postgresql/data
+         #- shared_tmp:/tmp
      environment:
          - POSTGRES_USER=optima
          - POSTGRES_PASSWORD=123456
          - POSTGRES_DB=postgres
          - PG_REP_USER=rep
          - PG_REP_PASSWORD=123456
+         - WHOISTHIS=pg_red
      networks:
            - bridge-docker
      restart: always
@@ -32,6 +34,7 @@ services:
          - POSTGRES_DB=postgres
          - PG_REP_USER=rep
          - PG_REP_PASSWORD=123456
+         - WHOISTHIS=pg_green
      networks:
             - bridge-docker
      restart: always
@@ -44,12 +47,14 @@ services:
          - "5447:5432"
      volumes:
          - pg_blue_data:/var/lib/postgresql/data
+         - shared_tmp:/tmp
      environment:
          - POSTGRES_USER=optima
          - POSTGRES_PASSWORD=123456
          - POSTGRES_DB=postgres
          - PG_REP_USER=rep
          - PG_REP_PASSWORD=123456
+         - WHOISTHIS=pg_blue
      networks:
             - bridge-docker
      restart: always
@@ -90,7 +95,8 @@ services:
          - PGPOOL_PARAMS_BACKEND_FLAG1='ALLOW_TO_FAILOVER'
          - PGPOOL_PARAMS_BACKEND_FLAG2='ALLOW_TO_FAILOVER'
          - PGPOOL_PARAMS_FAILOVER_ON_BACKEND_ERROR=ON
-         - PGPOOL_PARAMS_FAILOVER_COMMAND="/failover.sh"
+         - PGPOOL_PARAMS_FAILOVER_COMMAND="/failover.sh" %H
+         - PGPOOL_PARAMS_FOLLOW_MASTER_COMMAND="/setup-slave.sh NEW_MASTER %H"
      networks:
          - bridge-docker
      restart: always
@@ -101,5 +107,3 @@ volumes:
   shared_tmp:
 networks:
   bridge-docker:
-    external:
-      name: bridge-docker
