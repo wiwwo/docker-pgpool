@@ -24,15 +24,23 @@ $ docker system prune
 ```
 
 # To connect to instances
-`$ psql -h localhost -Uoptima postgres -p5445`
-`$ psql -h localhost -Uoptima postgres -p5446`
-`$ psql -h localhost -Uoptima postgres -p9999`
+```
+$ psql -h localhost -Uoptima postgres -p5445
+
+$ psql -h localhost -Uoptima postgres -p5446
+
+$ psql -h localhost -Uoptima postgres -p9999
+```
 
 
 # pgBench
 
-`$ pgbench  -h localhost -p9999  -Uoptima postgres -p9999  -i`
-`$ pgbench  -h localhost -p9999  -Uoptima postgres -p9999  -c 10 -j 2 -t 100`
+```
+$ pgbench  -h localhost -p9999  -Uoptima postgres -p9999  -i
+
+$ pgbench  -h localhost -p9999  -Uoptima postgres -p9999  -c 10 -j 2 -t 100
+```
+
 
 `$ psql -h localhost -Uoptima postgres -p9999 -c "show pool_nodes;"`
 
